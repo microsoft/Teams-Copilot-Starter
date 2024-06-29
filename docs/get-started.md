@@ -42,7 +42,7 @@ You can ask the bot any general questions. The will invoke not invoke any action
 
 ### Get Company Information
 
-You can get general information of companies. This will invoke the *getCompanyInfo* action.
+You can get general information of companies. This will invoke the *getSemanticInfo* action.
 
 - Syntax: `Tell me about [company name]`
 - Example: `Tell me about Microsoft`

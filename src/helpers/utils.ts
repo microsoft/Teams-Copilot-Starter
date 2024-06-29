@@ -11,10 +11,15 @@ import EntityInfo from "../models/entityInfo";
 import CompanyInfo from "../models/companyInfo";
 import fetch from "node-fetch";
 import * as ACData from "adaptivecards-templating";
-import { Citation, PredictedCommand } from "@microsoft/teams-ai";
+import {
+  Citation,
+  ClientCitation,
+  PredictedCommand,
+} from "@microsoft/teams-ai";
 import { ApplicationTurnState } from "../models/aiTypes";
 import { container } from "tsyringe";
 import { Env } from "../env";
+import { TeamsAI } from "../bot/teamsAI";
 
 const TYPING_TIMER_DELAY = 1000;
 // Define a Utils class
@@ -154,10 +159,12 @@ export class Utils {
     botId: string
   ): Attachment {
     const cardTemplate = Utils.getCompaniesListAdaptiveCardTemplate();
-    const handOffToBotUrl = `https://teams.microsoft.com/l/chat/0/0?users=28:${botId}&continuationToken=${company.id}`;
     return Utils.getAdaptiveCardWithData(cardTemplate, {
       entity: company,
-      handOffToBotUrl: handOffToBotUrl,
+      handOffToBotUrl: `${TeamsAI.HandoffUrl.replace(
+        "${continuation}",
+        company.id
+      )}`,
     });
   }
 
@@ -168,7 +175,7 @@ export class Utils {
     card.content.tap = {
       type: "invoke",
       value: {
-        verb: "getCompanyInfo",
+        verb: "getSemanticInfo",
         entity: company,
       },
     };
@@ -332,11 +339,11 @@ export class Utils {
           type: "Action.Submit",
           title: "View Details",
           data: {
-            verb: "getCompanyInfo",
+            verb: "getSemanticInfo",
             msteams: {
               type: "task/fetch",
             },
-            command: "getCompanyInfo",
+            command: "getSemanticInfo",
             entity: "${entity}",
           },
         },
@@ -424,13 +431,12 @@ export class Utils {
    * @returns {string} The formatted content.
    */
   static formatCitationsResponse(content: string): string {
-    const regex = /\[doc(\d+)\]/g;
-    let match;
-    let index = 1;
-    while ((match = regex.exec(content)) !== null) {
-      content = content.replace(match[0], `[${index++}]`);
-    }
-    return content;
+    // Replace all occurrences of `[docX]` with `[X]`
+    const newContent = content.replace(/\[doc(\d+)\]/g, (match, p1) => {
+      return `[${p1}]`;
+    });
+
+    return newContent;
   }
 
   /**
@@ -504,25 +510,66 @@ export class Utils {
   }
 
   /**
-   * Extracts citations from the content using a regular expression that uses bolded text to create citations.
+   * Extracts citations from the content using a regular expression that uses [doc#] to create citations references.
    * @param {string} content The content to extract citations from.
-   * @returns {Citation[]} The extracted citations.
+   * @param {Citation[]} contextCitations The citations to extract from the content.
+   * @returns {string, Citation[]} The formatted content and extracted citations in form of a tuple.
    */
-  public static extractCitations(content: string): Citation[] {
-    const citations: Citation[] = [];
-    // Create a regular expression to match markdown-style bolded text
-    const regex = /\*\*(.*?)\*\*/g;
+  public static formatCitations(
+    content: string,
+    contextCitations: Citation[]
+  ): [string, ClientCitation[] | undefined] {
+    const env = container.resolve(Env);
 
-    // Extract the citations from the content
-    const matches = Array.from(content.matchAll(regex)).map((m) => m[1]);
-    matches.forEach((match) => {
-      citations.push({
-        title: `Document ${match}`,
-        content: `Document ${match} content`,
-        url: `https://example.com/doc${match}`,
-        filepath: `doc${match}.pdf`,
-      });
+    // If the response from AI includes citations, they will be parsed and added to the response
+    const citations = contextCitations.map((citation, i) => {
+      return {
+        "@type": "Claim",
+        position: `${i + 1}`,
+        appearance: {
+          "@type": "DigitalDocument",
+          name: citation.title,
+          abstract: Utils.extractSnippet(citation.content, 500),
+          url: `${TeamsAI.HandoffUrl.replace(
+            "${continuation}",
+            citation.url ?? citation.title ?? ""
+          )}`,
+          usageInfo: {
+            type: "https://schema.org/Message",
+            "@type": "CreativeWork",
+            name: "Confidentiality Policy",
+            description:
+              "This document is confidential and should not be shared with unauthorized personnel.",
+          },
+        },
+      } as ClientCitation;
     });
-    return citations;
+
+    // If there are citations, modify the content so that the sources are numbered instead of [doc1]
+    const contentText = !citations
+      ? content
+      : Utils.formatCitationsResponse(content);
+
+    // If there are citations, filter out the citations unused in content.
+    const referencedCitations = citations
+      ? Utils.filterUnusedCitations(contentText, citations)
+      : undefined;
+
+    return [contentText, referencedCitations];
+  }
+
+  /**
+   * Filters out citations that are not used in the content.
+   * @param {string} contentText The content text to filter citations from.
+   * @param {ClientCitation[]} citations The citations to filter.
+   * @returns {ClientCitation[]} The filtered citations.
+   */
+  public static filterUnusedCitations(
+    contentText: string,
+    citations: ClientCitation[]
+  ): ClientCitation[] {
+    return citations.filter((citation) =>
+      contentText.includes(`[${citation.position}]`)
+    );
   }
 }

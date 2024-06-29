@@ -74,6 +74,9 @@
     "documentDataSource": {
       "value": "${{DOCUMENTDATA_SOURCE_NAME}}"
     },
+    "azureAISearch": {
+      "value": "${{AZURE_SEARCH_SOURCE_NAME}}"
+    },
     "maxTurns": {
       "value": "${{MAX_TURNS}}"
     },

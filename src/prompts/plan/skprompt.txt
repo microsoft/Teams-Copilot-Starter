@@ -16,7 +16,7 @@ Examples:
   
   User: Tell me about Tesla?
   Assistant: Return the JSON plan in the following format: 
-  {"type": "plan", "commands": [{"type": "SAY", "response": "Certainly! I'm fetching the general information about Tesla."}, {"type": "DO", "action": "getCompanyInfo", "parameters": {"entity": "Tesla"}]}
+  {"type": "plan", "commands": [{"type": "SAY", "response": "Certainly! I'm fetching the general information about Tesla."}, {"type": "DO", "action": "getSemanticInfo", "parameters": {"entity": "Tesla"}]}
 
   User: Give me the detailed information for Tesla?
   Assistant: Return the plan object in the following format: 

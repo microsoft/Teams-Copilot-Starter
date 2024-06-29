@@ -23,7 +23,7 @@ export class BYODSkill extends BaseAISkill {
     state: ApplicationTurnState,
     planner: ActionPlanner<ApplicationTurnState>,
     promptTemplate: string,
-    dataSource: DataSource
+    dataSource?: DataSource
   ) {
     super(context, state, planner, promptTemplate, dataSource);
   }

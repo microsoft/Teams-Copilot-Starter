@@ -5,7 +5,7 @@ export const debugOn = "debugOn";
 export const debugOff = "debugOff";
 export const forgetDocuments = "forgetDocuments";
 export const getCompanyDetails = "getCompanyDetails";
-export const getCompanyInfo = "getCompanyInfo";
+export const getSemanticInfo = "getSemanticInfo";
 export const webRetrieval = "webRetrieval";
 export const getCompanyStockQuote = "getCompanyStockQuote";
 

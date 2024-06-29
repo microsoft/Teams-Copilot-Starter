@@ -45,6 +45,7 @@ param maxPages string
 param webDataSource string
 param documentDataSource string
 param indexFolderPath string
+param azureAISearch string
 
 var oauthAuthority = uri(aadAppOauthAuthorityHost, aadAppTenantId)
 var teamsMobileOrDesktopAppClientId = '1fec8e78-bce4-4aaf-ab1b-5451cc387264'
@@ -160,6 +161,7 @@ resource botWebAppSettings 'Microsoft.Web/sites/config@2021-02-01' = {
     STORAGE_CONTAINER_NAME: storageContainerName
     WEBDATA_SOURCE_NAME: webDataSource
     DOCUMENTDATA_SOURCE_NAME: documentDataSource
+    AZURE_SEARCH_SOURCE_NAME: azureAISearch
     APPLICATIONINSIGHTS_INSTRUMENTATION_KEY: botAppInsights.properties.InstrumentationKey
     MAX_TURNS: maxTurns
     MAX_FILE_SIZE: maxFileSize

@@ -7,7 +7,6 @@ import * as path from "path";
 // See https://aka.ms/bot-services to learn more about the different parts of a bot.
 import {
   ConfigurationServiceClientCredentialFactory,
-  MemoryStorage,
   TurnContext,
 } from "botbuilder";
 
@@ -15,7 +14,6 @@ import { AxiosError } from "axios";
 import { container } from "tsyringe";
 import { logging } from "./telemetry/loggerManager";
 import { configureTeamsAI } from "./configTeamsAI";
-import { addResponseFormatter } from "./responseFormatter";
 import { Env } from "./env";
 import { ConsoleLogger } from "./telemetry/consoleLogger";
 import { AppInsightLogger } from "./telemetry/appInsightLogger";

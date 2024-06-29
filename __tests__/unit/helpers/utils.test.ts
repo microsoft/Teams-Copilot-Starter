@@ -3,6 +3,7 @@ import "reflect-metadata";
 import { Utils } from "../../../src/helpers/utils"; // adjust the import path to your actual file structure
 import fetch from "node-fetch";
 jest.mock("node-fetch");
+jest.mock("../../../src/env");
 
 const publicFileName =
   "https://tcspublicfiles.blob.core.windows.net/files/w.txt";

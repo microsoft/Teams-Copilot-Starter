@@ -8,15 +8,15 @@
     "description": "Turns off the debug mode for the bot. This will disable the bot from sending debug messages back to the user."
   },
   {
-    "name": "getCompanyInfo",
-    "description": "Retrieves the GPT response on the inquired company",
+    "name": "getSemanticInfo",
+    "description": "Retrieves the GPT response for the user's prompt. It may include the summary, key points, and other relevant information about the user's query.",
     "canRunWith": ["getCompanyDetails"],
     "parameters": {
       "type": "object",
       "properties": {
         "entity": {
           "type": "string",
-          "description": "The company name for which the GPT response is being retrieved"
+          "description": "The subject entity for which the GPT response is being retrieved"
         }
       },
       "required": ["entity"]
@@ -39,7 +39,7 @@
   {
     "name": "getCompanyDetails",
     "description": "Gets the details about the specified company",
-    "canRunWith": ["getCompanyInfo"],
+    "canRunWith": ["getSemanticInfo"],
     "parameters": {
       "type": "object",
       "properties": {

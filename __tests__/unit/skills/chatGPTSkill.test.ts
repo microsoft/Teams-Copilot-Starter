@@ -77,7 +77,7 @@ describe("ChatGPTSkill", () => {
 
     const result = await chatGPTSkill.run(input);
 
-    expect(result).toBe(expectedContent);
+    expect(result.content).toBe(expectedContent);
   });
 
   it("should return undefined when run on chatGPTSkill is not succesfully called", async () => {

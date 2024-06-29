@@ -10,7 +10,10 @@ export class AppInsightLogger implements ILogger {
   private env: Env;
   constructor() {
     this.env = container.resolve(Env);
-    if (this.env.data.APPLICATIONINSIGHTS_INSTRUMENTATION_KEY) {
+    if (
+      this.env.data &&
+      this.env.data.APPLICATIONINSIGHTS_INSTRUMENTATION_KEY
+    ) {
       this.appInsightClient = new AppInsightsService(
         this.env.data.APPLICATIONINSIGHTS_INSTRUMENTATION_KEY
       );

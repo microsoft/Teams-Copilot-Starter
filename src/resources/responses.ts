@@ -70,20 +70,20 @@ export function reset(): string {
  */
 export function entityNotFound(): string {
   return getRandomResponse([
-    "I'm sorry, but I couldn't find any information about the company you mentioned. Please verify the company name or provide the correct name or ticker symbol, and I'll do my best to help you.",
-    "Apologies, but I don't have any information on the company you mentioned. Please double-check the company name or provide the correct name or ticker symbol, and I'll try my best to support you.",
-    "I regret to inform you that I'm unable to find any information about the company you mentioned. Kindly verify the company name or provide the correct name or ticker symbol, and I'll make every effort to assist you.",
-    "I apologize for the inconvenience, but I don't have any knowledge about the company you mentioned. It's possible that the company you specified is not part of the list of tracked organizations. Kindly verify the company name or provide the correct name or ticker symbol, and I'll make every effort to assist you.",
-    "I'm sorry, but I couldn't find any information about the company you mentioned. Please verify the company name or provide the correct name or ticker symbol, and I'll do my best to help you.",
+    "I'm sorry, but I couldn't find any information about the entity you mentioned. Please verify the entity or provide the correct name or ticker symbol, and I'll do my best to help you.",
+    "Apologies, but I don't have any information on the entity you mentioned. Please double-check the entity or provide the correct name or ticker symbol, and I'll try my best to support you.",
+    "I regret to inform you that I'm unable to find any information about the entity you mentioned. Kindly verify the entity or provide the correct name or ticker symbol, and I'll make every effort to assist you.",
+    "I apologize for the inconvenience, but I don't have any knowledge about the entity you mentioned. It's possible that the entity you specified is not part of the list of tracked organizations. Kindly verify the entity or provide the correct name or ticker symbol, and I'll make every effort to assist you.",
+    "I'm sorry, but I couldn't find any information about the entity you mentioned. Please verify the entity or provide the correct name or ticker symbol, and I'll do my best to help you.",
   ]);
 }
 
 export function promptNotFound(): string {
   return getRandomResponse([
-    "I'm sorry, but I couldn't find any further answers to your question.",
-    "Apologies, but I don't have any further answers to your question.",
-    "I regret to inform you that I'm unable to find any further answers to your question.",
-    "I apologize for the inconvenience, but I don't have any further answers to your question.",
+    "I'm sorry, but I couldn't find any answers to your question.",
+    "Apologies, but I don't have any answers to your question.",
+    "I regret to inform you that I'm unable to find any answers to your question.",
+    "I apologize for the inconvenience, but I don't have any answers to your question.",
   ]);
 }
 
@@ -221,10 +221,9 @@ export function contentRetrievalInProgress(): string {
 
 export function noUploadedDocument(): string {
   return getRandomResponse([
-    "I'm sorry, but I couldn't find any uploaded documents.",
-    "Apologies, but I don't have any uploaded documents to process.",
-    "I regret to inform you that I'm unable to find any uploaded documents.",
-    "I apologize for the inconvenience, but I don't have any uploaded documents to process.",
+    "Since no documents were uploaded, I'll use the ingested documents saved in Azure Blob Storage.",
+    "As no documents were uploaded, I'll utilize the ingested documents saved in Azure Blob Storage.",
+    "Since no documents were uploaded, I'll refer to the ingested documents saved in Azure Blob Storage.",
   ]);
 }
 

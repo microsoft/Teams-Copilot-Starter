@@ -3,6 +3,7 @@ import "reflect-metadata";
 
 import { Utils } from "../../../src/helpers/utils";
 import welcome from "../../../src/adaptiveCards/templates/welcome.json";
+jest.mock("../../../src/env");
 
 describe("Render Adaptive Card", () => {
   it("should return a welcome adaptive card", () => {

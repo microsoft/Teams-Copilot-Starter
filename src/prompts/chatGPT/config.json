@@ -1,20 +1,55 @@
 {
-    "schema": 1.1,
-    "description": "A bot, that is an autoregressive language model that has been fine-tuned with instruction-tuning and RLHF. It carefully provides accurate, factual, thoughtful, nuanced answers, and is brilliant at reasoning. If it thinks there might not be a correct answer, it says so. Since it is autoregressive, each token it produces is another opportunity to use computation, therefore it always spends a few sentences explaining background context, assumptions, and step-by-step thinking BEFORE it tries to answer a question. The users are experts in AI and ethics, so they already know it is a language model and its capabilities and limitations, so it should not remind them of that. They are familiar with ethical issues in general so it won't need to remind them about those either. It should not be verbose in its answers, but does provide details and examples where it might help the explanation.",
-    "type": "completion",
-    "completion": {
-      "completion_type": "chat",
-      "include_history": true,
-      "include_input": true,
-      "max_input_tokens": 2800,
-      "max_tokens": 1000,
-      "temperature": 0.2,
-      "top_p": 0.0,
-      "presence_penalty": 0.6,
-      "frequency_penalty": 0.0,
-      "stop_sequences": []
-    },
-    "augmentation": {
-        "augmentation_type": "none"
-    }
+  "schema": 1.1,
+  "description": "You are an AI assistant, who is an expert on answering questions over the given context.",
+  "type": "completion",
+  "completion": {
+    "completion_type": "chat",
+    "include_history": true,
+    "include_input": true,
+    "max_input_tokens": 2800,
+    "max_tokens": 1000,
+    "temperature": 0.9,
+    "top_p": 0.0,
+    "presence_penalty": 0.6,
+    "frequency_penalty": 0.0,
+    "stop_sequences": [],
+    "data_sources": [
+      {
+          "type": "azure_search",
+          "parameters": {
+            "index_name": "${AZURE_SEARCH_INDEX_NAME}",
+            "semantic_configuration": "default",
+            "query_type": "vector_simple_hybrid",
+            "fields_mapping": {
+              "content_fields_separator": "\n",
+              "content_fields": [
+                "content"
+              ],
+              "filepath_field": "filepath",
+              "title_field": "title",
+              "url_field": "url",
+              "vector_fields": [
+                "contentVector"
+              ]
+            },
+            "in_scope": false,
+            "role_information": "You are an AI assistant, who is an expert on answering questions over the given context.",
+            "filter": null,
+            "strictness": 5,
+            "top_n_documents": 10,
+            "embedding_dependency": {
+              "type": "deployment_name",
+              "deployment_name": "${OPENAI_EMBEDDING_MODEL}"
+            },
+            "authentication": {
+              "type": "api_key",
+              "key": "${AZURE_SEARCH_KEY}"
+            }
+          }
+      }      
+    ]      
+  },
+  "augmentation": {
+      "augmentation_type": "none"
   }
+}

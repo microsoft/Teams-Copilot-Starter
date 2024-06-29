@@ -3,6 +3,8 @@
 # Visit https://aka.ms/teamsfx-actions for details on actions
 version: 1.0.0
 
+environmentFolderPath: ./env
+
 provision:
   # Creates an App Registration in AAD
   - uses: aadApp/create # Creates a new Azure Active Directory (AAD) app to authenticate users if the environment variable that stores clientId is empty
@@ -17,12 +19,12 @@ provision:
       tenantId: AAD_APP_TENANT_ID
       authority: AAD_APP_OAUTH_AUTHORITY
       authorityHost: AAD_APP_OAUTH_AUTHORITY_HOST
-
+      
   # Creates a Teams app
   - uses: teamsApp/create
     with:
       # Teams app name
-      name: ${{APP_NAME}} ${{TEAMSFX_ENV}} ${{APP_VERSION}}
+      name: ${{APP_NAME}}
     # Write the information of created resources into environment file for
     # the specified environment variable(s).
     writeToEnvironmentFile:
@@ -32,7 +34,7 @@ provision:
   - uses: botAadApp/create
     with:
       # The Azure Active Directory application's display name
-      name: ${{APP_NAME}} ${{TEAMSFX_ENV}} ${{APP_VERSION}}
+      name: ${{APP_NAME}}
     writeToEnvironmentFile:
       # The Azure Active Directory application's client id created for bot.
       botId: BOT_ID
@@ -43,18 +45,12 @@ provision:
   - uses: botFramework/create
     with:
       botId: ${{BOT_ID}}
-      name: ${{APP_NAME}} ${{TEAMSFX_ENV}}
+      name: ${{APP_NAME}}
       messagingEndpoint: ${{BOT_ENDPOINT}}/api/messages
       description: "${{APP_NAME}} ${{TEAMSFX_ENV}} ${{APP_VERSION}}"
       channels:
         - name: msteams
         - name: m365extensions
-
-  # Apply the AAD manifest to an existing AAD
-  - uses: aadApp/update # Apply the AAD manifest to an existing AAD app. Will use the object id in manifest file to determine which AAD app to update.
-    with:
-      manifestPath: ./appPackage/aad.manifest.json # Relative path to teamsfx folder. Environment variables in manifest will be replaced before apply to AAD app
-      outputFilePath: ./appPackage/build/aad.manifest.${{TEAMSFX_ENV}}.json
 
   # Validate using manifest schema
   - uses: teamsApp/validateManifest
@@ -136,6 +132,10 @@ deploy:
         MAX_TURNS: ${{MAX_TURNS}}
         MAX_FILE_SIZE: ${{MAX_FILE_SIZE}}
         MAX_PAGES: ${{MAX_PAGES}}
+        AZURE_SEARCH_ENDPOINT: ${{AZURE_SEARCH_ENDPOINT}}
+        AZURE_SEARCH_KEY: ${{AZURE_SEARCH_KEY}}
+        AZURE_SEARCH_INDEX_NAME: ${{AZURE_SEARCH_INDEX_NAME}}
+        AZURE_SEARCH_SOURCE_NAME: ${{AZURE_SEARCH_SOURCE_NAME}}
         # APPLICATIONINSIGHTS_INSTRUMENTATION_KEY: ${{APPLICATIONINSIGHTS_INSTRUMENTATION_KEY}}
         # CUSTOM_API_CLIENT_ID: ${{CUSTOM_API_CLIENT_ID}}
         # CUSTOM_API_CLIENT_SECRET: ${{CUSTOM_API_CLIENT_SECRET}}

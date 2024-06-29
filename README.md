@@ -111,7 +111,7 @@ See [Skill Customization Guide](./docs/concepts/skill-customization.md) and [Act
 
 1. Set `TEAMSFX_ENV` to `local` and set `VECTRA_INDEX_PATH` to `../index` in the `.env.local` file.
 
-1. Fill the `OPENAI_KEY`, `OPENAI_ENDPOINT`, `OPENAI_MODEL`, `OPENAI_API_VERSION`, `OPENAI_EMBEDDING_MODEL`, `STORAGE_ACCOUNT_NAME`, and `STORAGE_ACCOUNT_KEY` variables appropriately.
+1. Fill the `OPENAI_KEY`, `OPENAI_ENDPOINT`, `OPENAI_MODEL`, `OPENAI_API_VERSION`, `OPENAI_EMBEDDING_MODEL`, `STORAGE_ACCOUNT_NAME`, `STORAGE_ACCOUNT_KEY`, `AZURE_SEARCH_ENDPOINT` and `AZURE_SEARCH_KEY` variables appropriately.
 
 *NOTE*: If you want your prompt template to use a different model other than the default (configured in the `OPENAI_MODEL` environment variable), you can set the model inside the `completion` object that is defined in the `config.json` file in the `prompts` folder.
 
@@ -145,12 +145,16 @@ This action in the pipeline copies the environment variables from the `.env.loca
 | `OPENAI_EMBEDDING_MODEL` | The model to be used for embeddings. For Azure OpenAI this is the name of the deployment to use. This setting is only used when you chat with a document or web content. |
 | `STORAGE_ACCOUNT_NAME` | The name of the storage account |
 | `STORAGE_ACCOUNT_KEY` | The key for the storage account |
+| `AZURE_SEARCH_ENDPOINT` | The URL endpoint to the Azure AI Search service |
+| `AZURE_SEARCH_KEY` | The key for the Azure AI Search service |
+| `AZURE_SEARCH_INDEX_NAME` | The name of the Azure AI Search index |
 | `VECTRA_INDEX_PATH` | The path of the Vectra database index. This is used for non-production scenarios. When running locally, the value is `../index` and when running in Azure, the value is `D:\\Home\\index`. |
 | `OPENAI_API_VERSION` | This is only used by Azure OpenAI |
 | `DEFAULT_PROMPT_NAME` | The default prompt name. The default is `plan` and refers to the folder name in `prompts/` folder |
 | `STORAGE_CONTAINER_NAME` | The name of the storage container that will store conversation state |
 | `WEBDATA_SOURCE_NAME` | The name of the web data source. If this value is changed, it will also need to be changed in the `prompts/questionWeb/config.json` file |
 | `DOCUMENTDATA_SOURCE_NAME` | The name of the document data source. If this value is changed, it will also need to be changed in the `prompts/questionDocument/config.json` file |
+| `AZURE_SEARCH_SOURCE_NAME` | The name of the Azure AI Search data source property. If this value is changed, it will also need to be changed in the `prompts/chatGPT/config.json` file |
 | `MAX_TURNS` | The maximum number of turns |
 | `MAX_FILE_SIZE` | The maximum file size |
 | `MAX_PAGES` | The maximum number of pages |

@@ -77,6 +77,6 @@ describe("TeamsAI", () => {
 
     const result = await chatGPTSkill.run(input);
 
-    expect(result).toBe(expectedContent);
+    expect(result.content).toBe(expectedContent);
   });
 });

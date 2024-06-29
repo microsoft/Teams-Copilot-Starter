@@ -1,6 +1,13 @@
 import "reflect-metadata";
 import { container } from "tsyringe";
+
+import { CustomDataSourceSkill } from "../skills/customDataSourceSkill";
+import companyListCard from "../adaptiveCards/templates/companyList.json";
+import genHandoffCard from "../adaptiveCards/templates/genericHandoffCard.json";
+
 import {
+  Attachment,
+  CardFactory,
   Channels,
   MessagingExtensionAttachment,
   TurnContext,
@@ -8,13 +15,14 @@ import {
 import { ActionPlanner, Query } from "@microsoft/teams-ai";
 import { ApplicationTurnState, TData } from "../models/aiTypes";
 import { Logger } from "../telemetry/logger";
-import { CustomDataSourceSkill } from "../skills/customDataSourceSkill";
 import CompanyInfo from "../models/companyInfo";
 import { TeamsAI } from "../bot/teamsAI";
 import { Utils } from "../helpers/utils";
-import companyListCard from "../adaptiveCards/templates/companyList.json";
 import { EntityRecognitionSkill } from "../skills";
 import { Env } from "../env";
+import * as querystring from "querystring";
+import * as ACData from "adaptivecards-templating";
+import axios from "axios";
 
 /**
  * Searches for entities based on a query and returns the results as a list of attachments.
@@ -174,4 +182,50 @@ export async function selectItem(
       type: "result",
     };
   }
+}
+
+/**
+ * Searches for an npm package based on the query and returns the results as a list of attachments.
+ * @param context
+ * @param state
+ * @param query
+ * @param planner
+ * @param logger
+ */
+export async function findNpmPackage(
+  context: TurnContext,
+  state: ApplicationTurnState,
+  query: Query<Record<string, any>>,
+  env: Env,
+  logger: Logger
+): Promise<any> {
+  logger.info(`Query received: ${query.parameters.npmPackageName}`);
+  const searchQuery = query.parameters.npmPackageName;
+  const response = await axios.get(
+    `http://registry.npmjs.com/-/v1/search?${querystring.stringify({
+      text: searchQuery,
+      size: 8,
+    })}`
+  );
+
+  const attachments: Attachment[] = [];
+  response.data.objects.forEach((obj: any) => {
+    const template = new ACData.Template(genHandoffCard);
+    const card = template.expand({
+      $root: {
+        name: obj.package.name,
+        description: obj.package.description,
+        handoffUrl: `https://teams.microsoft.com/l/chat/0/0?users=28:${env.data.BOT_ID}&continuation=${obj.package.name}`,
+      },
+    });
+    const preview = CardFactory.heroCard(obj.package.name);
+    const attachment = { ...CardFactory.adaptiveCard(card), preview };
+    attachments.push(attachment);
+  });
+
+  return {
+    type: "result",
+    attachmentLayout: "list",
+    attachments: attachments,
+  };
 }

@@ -92,10 +92,11 @@ export function configureTeamsAI(
       // Show typing indicator
       await Utils.startTypingTimer(context, state);
 
-      if (state.conversation.promptFolder) {
-        return prompts.getPrompt(state.conversation.promptFolder);
-      }
-      return prompts.getPrompt(env.data.DEFAULT_PROMPT_NAME);
+      const template = state.conversation.promptFolder
+        ? await prompts.getPrompt(state.conversation.promptFolder)
+        : await prompts.getPrompt(env.data.DEFAULT_PROMPT_NAME);
+
+      return template;
     },
   });
 

@@ -7,7 +7,9 @@ The Action Planner has a built-in prompt management system that supports creatin
 Teams Copilot Starter comes with the following prompt templates:
 
 - **plan**: uses a dynamic prompt and configuration parameters to control behavior of Teams AI Library Action Planner. This prompt template contains the configuration of all supported `actions` by Teams Copilot Starter. More about supported `actions` later in this document.
+  
 - **chatGPT**: uses a user defined dynamic prompt to support a freely flowing conversation with the user via use of LLM chat completion model. It has the ability to "remember" (maintain) the conversation history up to the configurable number of turns.
+  
 - **findEntity**: uses a user defined prompt template that instructs LLM to look up for a publicly known company entity to be returned in the specified JSON format:
 
   ```json
@@ -84,7 +86,7 @@ The Action Planner does this by using Teams AI to mix and match atomic functions
 
 This is a powerful concept because it allows you to create actions that can be used in ways that you as a developer may not have thought of.
 
-For instance, If you have a task with `getCompanyInfo` & `getCompanyDetails` actions, the planner could combine them to create workflows like "Tell me about Microsoft and provide their financial outlook" without you explicitly having to write code for those scenarios.
+For instance, If you have a task with `getSemanticInfo` & `getCompanyDetails` actions, the planner could combine them to create workflows like "Tell me about Microsoft and provide their financial outlook" without you explicitly having to write code for those scenarios.
 
 ### Augmentations
 
@@ -114,7 +116,7 @@ This augmentation is unique compared to the previously described augmentation mo
 
 ```json
   {
-    "name": "getCompanyInfo",
+    "name": "getSemanticInfo",
     "description": "Retrieves the GPT response on the inquired company",
     "canRunWith": ["getCompanyDetails"],
     "parameters": {
@@ -131,7 +133,7 @@ This augmentation is unique compared to the previously described augmentation mo
   {
     "name": "getCompanyDetails",
     "description": "Gets the details about the specified company",
-    "canRunWith": ["getCompanyInfo"],
+    "canRunWith": ["getSemanticInfo"],
     "parameters": {
       "type": "object",
       "properties": {
@@ -146,7 +148,7 @@ This augmentation is unique compared to the previously described augmentation mo
 
 ```
 
-The `canRunWith` property is declared in both actions. That means that when the plan creates to run both actions, most likely the `getCompanyInfo` will be the first to run. The plan will be created with only `getCompanyInfo` action in the actions list of the action plan, while `getCompanyDetails` action will be moved to be the _child_ of the `getCompanyInfo` action marked as a parallel action. You can see the resulted action plan in the example diagram below.
+The `canRunWith` property is declared in both actions. That means that when the plan creates to run both actions, most likely the `getSemanticInfo` will be the first to run. The plan will be created with only `getSemanticInfo` action in the actions list of the action plan, while `getCompanyDetails` action will be moved to be the _child_ of the `getSemanticInfo` action marked as a parallel action. You can see the resulted action plan in the example diagram below.
 
 #### Action Commands and Entities
 
@@ -169,7 +171,7 @@ User: "`tell me about Walmart and then provide their financial outlook`"
 This plan is executed in parallel order as the `parallelActions` property of type `DO` suggests.
 
 - The bot will send the first `SAY` message back to the user.
-- [Parallel] The `getCompanyInfo` action will be executed using the chat GPT prompt template
+- [Parallel] The `getSemanticInfo` action will be executed using the chat GPT prompt template
 - [Parallel] The `getCompanyDetails` action will be executed, which will return the company's financial details: company's annual revenue, # of employees, the latest info, ESG scores, suggested prompts and the list of other competitive companies. 
 - The `response` message for the second type `SAY` will be sent to the user.
 
@@ -180,7 +182,7 @@ The planner is an extensible part of the Teams AI Library. This means that a cus
 
 - **debugOn**: Turns on the debug mode for the bot. When the debug mode is on, the bot outputs to the user the details about the action plan to be executed and the time it took to execute this plan.
 - **debugOff**: Turns off the debug mode for the bot. This will stop showing the action plan to be executed and will also stop showing the performance metrics for that action.
-- **getCompanyInfo**: Retrieves the public information on the company found in the user's entry prompt. This action takes one mandatory parameter `entity`, which would be filled in by the result of running the `findEntity` Semantic Skill.
+- **getSemanticInfo**: Retrieves the public information on the company found in the user's entry prompt. This action takes one mandatory parameter `entity`, which would be filled in by the result of running the `findEntity` Semantic Skill.
 - **getCompanyDetails**: Retrieves the financial details about the `entity`, and as an example, augments that public data with a "proprietary" sample ESG scores from the custom action skill implementation. This can be replaced with your own business logic.
 - **chatWithDocument**: This action summarizes or extracts key points from uploaded Text or PDF documents. It also allows the user to ask questions related to the uploaded documents.
 - **webRetrieval**: When the user provides a web link with their prompt, this action extracts relevant information from the webpage's textual content. It also allows a user to follow up on additional questions related to this web content until the user explicitly asks to forget that document.

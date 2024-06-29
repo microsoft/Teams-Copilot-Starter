@@ -1,7 +1,14 @@
 import "reflect-metadata";
-import { ActionPlanner, Citation, ClientCitation } from "@microsoft/teams-ai";
+import {
+  ActionPlanner,
+  Citation,
+  ClientCitation,
+  PromptTemplate,
+} from "@microsoft/teams-ai";
 import { AllowedFileTypes, ApplicationTurnState } from "../models/aiTypes";
 import { Attachment, TurnContext } from "botbuilder";
+import path from "path";
+import fs from "fs";
 import * as mime from "mime-types";
 import * as responses from "../resources/responses";
 import {
@@ -230,5 +237,57 @@ export class ActionsHelper {
     });
 
     return clientCitations;
+  }
+
+  /**
+   * Adds the Azure AI Search data source to the provided prompt template
+   * @param promptTemplate The name of the prompt template
+   * @param planner The action planner
+   * @returns The updated prompt template
+   */
+  public static async addAzureAISearchDataSource(
+    promptTemplate: string,
+    planner: ActionPlanner<ApplicationTurnState>
+  ): Promise<any> {
+    // Get the prompts from the planner
+    const prompts = planner.prompts;
+
+    // Get the environment settings
+    const env = container.resolve<Env>(Env);
+
+    // Get the prompt template for the provided prompt folder
+    const template = await prompts.getPrompt(promptTemplate);
+
+    // Read the SKPrompt from the file
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    const skprompt = fs.readFileSync(
+      path.join(__dirname, "..", "prompts", promptTemplate, "skprompt.txt")
+    );
+
+    //
+    // Use the Azure AI Search data source for RAG over documents
+    //
+    const dataSources = (template.config.completion as any)["data_sources"];
+
+    if (dataSources && dataSources.length > 0 && env.data) {
+      dataSources.forEach((dataSource: any) => {
+        if (dataSource.type === "azure_search" && dataSource.parameters) {
+          dataSource.parameters.endpoint = env.data.AZURE_SEARCH_ENDPOINT;
+          dataSource.parameters.authentication.key = env.data.AZURE_SEARCH_KEY;
+          dataSource.parameters.index_name = env.data.AZURE_SEARCH_INDEX_NAME;
+          dataSource.parameters.role_information = `${skprompt.toString(
+            "utf-8"
+          )}`;
+          if (dataSource.parameters.embedding_dependency) {
+            dataSource.parameters.embedding_dependency.deployment_name =
+              env.data.OPENAI_EMBEDDING_MODEL;
+          }
+        }
+      });
+    } else {
+      logger.error("No data sources found in the environment settings.");
+    }
+
+    return dataSources;
   }
 }

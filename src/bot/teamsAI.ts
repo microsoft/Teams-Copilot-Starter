@@ -12,6 +12,8 @@ import {
   ApplicationBuilder,
   FeedbackLoopData,
   AuthError,
+  PredictedSayCommand,
+  AI,
 } from "@microsoft/teams-ai";
 import {
   ActivityTypes,
@@ -19,7 +21,7 @@ import {
   TurnContext,
   Storage,
   Activity,
-  CardFactory
+  CardFactory,
 } from "botbuilder";
 import { ApplicationTurnState, ChatParameters, TData } from "../models/aiTypes";
 import debug from "debug";
@@ -46,7 +48,7 @@ import * as actionNames from "../actions/actionNames";
 import { 
   debugOn,
   debugOff,
-  getCompanyInfo,
+  getSemanticInfo,
   getCompanyDetails,
   chatWithDocument,
   forgetDocuments,
@@ -55,6 +57,7 @@ import {
   unknownAction,
   webRetrieval,
   getCompanyStockQuote,
+  formatActionMessage,
   resetIndex
 } from "../actions";
 import * as functionNames from "../functions/functionNames";
@@ -73,6 +76,7 @@ import {
 } from "../adaptiveCards/actions";
 import * as commandNames from "../messageExtensions/commandNames";
 import {
+  findNpmPackage,
   searchCmd, selectItem
 } from "../messageExtensions";
 import { UserHelper } from "../helpers/userHelper";
@@ -113,6 +117,9 @@ export class TeamsAI {
   // Turn events that let you do something before or after a turn is run.
   public static readonly BeforeTurn = "beforeTurn";
   public static readonly AfterTurn = "afterTurn";
+
+  // Handoff url template
+  public static HandoffUrl = "https://teams.microsoft.com/l/chat/0/0?users=28:${botId}&continuation=${continuation}";
 
   private configureAI(botId: string, adapter: TeamsAdapter, storage: Storage, planner: ActionPlanner<ApplicationTurnState>): Application<ApplicationTurnState> {
     const ai = new ApplicationBuilder<ApplicationTurnState>()
@@ -159,6 +166,9 @@ export class TeamsAI {
   ) {
     // Create the environment variables
     this.env = container.resolve<Env>(Env);
+
+    // Set up the handoff URL
+    TeamsAI.HandoffUrl = TeamsAI.HandoffUrl.replace("${botId}", this.env.data.BOT_ID ?? "");
 
     // Create the AI application
     this.app = this.configureAI(botAppId, adapter, storage, planner);    
@@ -267,6 +277,9 @@ export class TeamsAI {
     this.app.ai.action(actionNames.flaggedInputAction, flaggedInputAction);
     this.app.ai.action(actionNames.flaggedOutputAction, flaggedOutputAction);
 
+    // Register a handler to override the say command with custom logic
+    this.app.ai.action<PredictedSayCommand>(AI.SayCommandActionName, formatActionMessage);    
+    
     /**********************************************************************
      * FUNCTION: GET ACTIONS
      * Register a handler to handle the "getActions" semantic function
@@ -313,15 +326,15 @@ export class TeamsAI {
     this.app.ai.action(actionNames.debugOff, debugOff);
 
     /******************************************************************
-     * ACTION: GET COMPANY INFO
+     * ACTION: GET SEMANTIC GENERIC INFO
      *****************************************************************/
-    // Define a prompt action when the user sends a message containing the "getLatestInfo" action
-    this.app.ai.action(actionNames.getCompanyInfo, async (context: TurnContext, state: ApplicationTurnState) => getCompanyInfo(context, state, this.planner));
+    // Define a prompt action when the user sends a message containing the "getSemanticInfo" action
+    this.app.ai.action(actionNames.getSemanticInfo, async (context: TurnContext, state: ApplicationTurnState) => getSemanticInfo(context, state, this.planner));
 
     /******************************************************************
      * ACTION: GET COMPANY DETAILS
      *****************************************************************/
-    // Define a prompt action when the user sends a message containing the "getLatestInfo" action
+    // Define a prompt action when the user sends a message containing the "getCompanyDetails" action
     this.app.ai.action(
       actionNames.getCompanyDetails, 
       async (context: TurnContext, state: ApplicationTurnState, parameters: ChatParameters) => getCompanyDetails(context, state, parameters, this.planner));
@@ -377,10 +390,9 @@ export class TeamsAI {
     this.app.handoff(async (context: TurnContext, state: ApplicationTurnState, continuation: string) => {
       // Log the handoff
       this.logger.info(`Handoff received: ${continuation}`);
-      await context.sendActivity("Continuing the conversation started with M365 Copilot.");
-      if (state.conversation.debug) {
-        await context.sendActivity(`Handoff received: ${continuation}`);
-      }
+      await context.sendActivity("Continuing the conversation from another chat/application.");
+      await context.sendActivity(`Handoff received: ${continuation}`);
+           
     });
 
     /******************************************************************
@@ -398,15 +410,18 @@ export class TeamsAI {
     // Listen for /forgetDocument command and then delete the document properties from state
     this.app.adaptiveCards.actionExecute(actionNames.forgetDocuments, forgetDocuments);
 
-    // List for message extension search command
+    // Listen for message extension search command
     this.app.messageExtensions.query(commandNames.searchCmd, async (context: TurnContext, state: ApplicationTurnState, query: Query<Record<string, any>>) => searchCmd(context, state, query, this.planner, this.logger));
+
+    // Listen for message extension select item command
+    this.app.messageExtensions.query(commandNames.findNpmPackageCmd, async (context: TurnContext, state: ApplicationTurnState, query: Query<Record<string, any>>) => findNpmPackage(context, state, query, this.env, this.logger));
 
     // Listen for message extension select item command
     this.app.messageExtensions.selectItem(selectItem);
 
     // Task Module handler
     this.app.taskModules.fetch(
-      actionNames.getCompanyInfo,
+      actionNames.getSemanticInfo,
       async (
         context: TurnContext,
         state: ApplicationTurnState,

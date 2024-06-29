@@ -67,41 +67,41 @@
             }
         },
         {
-        "label": "Start Test Tool",
-        "type": "shell",
-        "command": "npm run dev:teamsfx:launch-testtool",
-        "isBackground": true,
-        "options": {
-            "env": {
-                "PATH": "${workspaceFolder}/devTools/teamsapptester/node_modules/.bin:${env:PATH}"
-            }
-        },
-        "windows": {
+            "label": "Start Test Tool",
+            "type": "shell",
+            "command": "npm run dev:teamsfx:launch-testtool",
+            "isBackground": true,
             "options": {
                 "env": {
-                    "PATH": "${workspaceFolder}/devTools/teamsapptester/node_modules/.bin;${env:PATH}"
+                    "PATH": "${workspaceFolder}/devTools/teamsapptester/node_modules/.bin:${env:PATH}"
                 }
-            }
-        },
-        "problemMatcher": {
-            "pattern": [
-                {
-                    "regexp": "^.*$",
-                    "file": 0,
-                    "location": 1,
-                    "message": 2
+            },
+            "windows": {
+                "options": {
+                    "env": {
+                        "PATH": "${workspaceFolder}/devTools/teamsapptester/node_modules/.bin;${env:PATH}"
+                    }
                 }
-            ],
-            "background": {
-                "activeOnStart": true,
-                "beginsPattern": ".*",
-                "endsPattern": "Listening on"
+            },
+            "problemMatcher": {
+                "pattern": [
+                    {
+                        "regexp": "^.*$",
+                        "file": 0,
+                        "location": 1,
+                        "message": 2
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*",
+                    "endsPattern": "Listening on"
+                }
+            },
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "silent"
             }
-        },
-        "presentation": {
-            "panel": "dedicated",
-            "reveal": "silent"
-        }
         },
         {
             "label": "Start Teams App Locally",
@@ -110,7 +110,19 @@
                 "Start local tunnel",
                 "Provision",
                 "Deploy",
-                "Start bot"
+                "Start application"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "Start Teams App Locally (Copilot)",
+            "dependsOn": [
+                "Validate prerequisites",
+                "Validate Copilot access",
+                "Start local tunnel",
+                "Provision",
+                "Deploy",
+                "Start application"
             ],
             "dependsOrder": "sequence"
         },
@@ -127,8 +139,20 @@
                     "portOccupancy" // Validate available ports to ensure those debug ones are not occupied.
                 ],
                 "portOccupancy": [
-                    3978, // bot service port
-                    9239 // bot inspector port for Node.js debugger
+                    3978, // app service port
+                    9239 // app inspector port for Node.js debugger
+                ]
+            }
+        },
+        {
+            // Check Copilot access.
+            // See https://aka.ms/teamsfx-tasks/check-prerequisites to know the details and how to customize the args.
+            "label": "Validate Copilot access",
+            "type": "teamsfx",
+            "command": "debug-check-prerequisites",
+            "args": {
+                "prerequisites": [
+                    "copilotAccess" // Validate if the account has Copilot access.
                 ]
             }
         },
@@ -177,12 +201,12 @@
             }
         },
         {
-            "label": "Start bot",
+            "label": "Start application",
             "type": "shell",
             "command": "npm run dev:teamsfx",
             "isBackground": true,
             "options": {
-                "cwd": "${workspaceFolder}/src"
+                "cwd": "${workspaceFolder}"
             },
             "problemMatcher": {
                 "pattern": [

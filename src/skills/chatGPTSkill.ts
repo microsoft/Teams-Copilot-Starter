@@ -10,6 +10,7 @@ import { AxiosError } from "axios";
 
 import { logging } from "../telemetry/loggerManager";
 import { Utils } from "../helpers/utils";
+import { ActionsHelper } from "../helpers/actionsHelper";
 
 // Get an instance of the Logger singleton object
 const logger = logging.getLogger("bot.TeamsAI");
@@ -71,6 +72,14 @@ export class ChatGPTSkill extends BaseAISkill {
     ];
     this.state.temp.input = JSON.stringify(chatHistory);
 
+    // Add the Azure AI Search RAG data source to the prompt
+    this.planner.prompts.addDataSource(
+      await ActionsHelper.addAzureAISearchDataSource(
+        AIPrompts.ChatGPT,
+        this.planner
+      )
+    );
+
     try {
       const response = await this.planner.completePrompt(
         this.context,
@@ -110,7 +119,13 @@ export class ChatGPTSkill extends BaseAISkill {
         return undefined;
       }
 
-      return Utils.extractJsonResponse(response.message?.content);
+      if (!response.message) {
+        logger.error("Chat GPT operation failed. No response received.");
+        await this.context.sendActivity(responses.openAIRateLimited());
+        return undefined;
+      }
+
+      return response.message;
     } catch (error: any) {
       if (error.name === "AxiosError" && error.message.includes("429")) {
         await this.context.sendActivity(responses.openAIRateLimited());

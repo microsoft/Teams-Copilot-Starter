@@ -1,14 +1,13 @@
 {
-    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
-    "manifestVersion": "1.16",
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.17",
     "version": "${{APP_VERSION}}",
     "id": "${{TEAMS_APP_ID}}",
-    "packageName": "com.microsoft.teams.extension.teamscopilotstarter",
     "developer": {
-        "name": "Microsoft Corporation",
-        "websiteUrl": "https://www.microsoft.com",
-        "privacyUrl": "https://www.microsoft.com/privatepolicy.aspx",
-        "termsOfUseUrl": "https://www.microsoft.com/termsofuseinfo.aspx"
+        "name": "Modern Work, ISE",
+        "websiteUrl": "https://www.example.com",
+        "privacyUrl": "https://www.example.com/privacy",
+        "termsOfUseUrl": "https://www.example.com/termofuse"
     },
     "icons": {
         "color": "color.png",
@@ -16,10 +15,10 @@
     },
     "name": {
         "short": "${{APP_NAME}}",
-        "full": "${{APP_NAME}} ${{APP_VERSION}}"
+        "full": "${{APP_NAME}} Bot Application Project"
     },
     "description": {
-        "short": "${{APP_NAME}}",
+        "short": "${{APP_NAME}} is a project template for targeting generative AI chatbots",
         "full": "${{APP_NAME}} is an AI-powered virtual assistant designed to help users with various tasks, such as answering questions, providing information, and offering suggestions. ${{APP_NAME}} leverages advanced natural language processing and machine learning algorithms to deliver accurate and context-aware information. It can assist with a wide range of topics, including general knowledge, programming, problem-solving, and more. Its primary goal is to make users' lives easier by providing quick and reliable assistance whenever needed. Use App mentioning @Teams Copilot Starter to ask any questions like using ChatGPT in any chat. Look up for companies info in the Copilot Message Extension or send your queries related to the Copilot knowledge database via Microsoft 365 Copilot plugin interface."
     },
     "accentColor": "#0028A0",
@@ -29,7 +28,7 @@
             "scopes": [
                 "personal",
                 "team",
-                "groupchat"
+                "groupChat"
             ],
             "supportsFiles": true,
             "isNotificationOnly": false,
@@ -38,7 +37,7 @@
                     "scopes": [
                         "personal",
                         "team",
-                        "groupchat"
+                        "groupChat"
                     ],
                     "commands": [
                         {
@@ -46,8 +45,8 @@
                             "description": "Start a new chat with Teams Copilot Starter"
                         },
                         {
-                            "title": "Get company info for ",
-                            "description": "Get company information for a given company"
+                            "title": "What is Teams Copilot Starter?",
+                            "description": "Get detailed information about Teams Copilot Starter"
                         },
                         {
                             "title": "Get company details for",
@@ -70,10 +69,9 @@
                 {
                   "id": "searchCmd",
                   "type": "query",
-                  "title": "Teams Copilot Starter",
-                  "description": "Get company information from Teams Copilot Starter",
-                  "initialRun": false,
-                  "fetchTask": false,
+                  "title": "Company Info",
+                  "description": "Get company information for the given company name",
+                  "semanticDescription": "Retrieves the company information for the given company name",
                   "context": [
                       "compose",
                       "commandBox"
@@ -86,6 +84,25 @@
                         "inputType": "text"
                     }
                   ]
+                },
+                {
+                    "id": "findNpmPackage",
+                    "context": [
+                        "compose",
+                        "commandBox"
+                    ],
+                    "description": "Search npm package by the npm package name",
+                    "title": "Npm Package",
+                    "type": "query",
+                    "semanticDescription": "Search for npm package for the given npm package name",
+                    "parameters": [
+                        {
+                            "name": "npmPackageName",
+                            "title": "Npm Package Name",
+                            "description": "Enter the name of the npm package to be searched",
+                            "inputType": "text"
+                        }
+                    ]
                 }
             ]
         }

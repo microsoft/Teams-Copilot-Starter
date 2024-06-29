@@ -6,7 +6,6 @@ import { Utils } from "../../helpers/utils";
 import { logging } from "../../telemetry/loggerManager";
 import * as responses from "../../resources/responses";
 import copilotCard from "../templates/copilotResponse.json";
-import { ActionsHelper } from "../../helpers/actionsHelper";
 
 /**
  * Sends a suggested prompt to the user and displays the response using an Adaptive Card.
@@ -42,14 +41,11 @@ export async function suggestedPrompt(
     return "";
   }
 
-  // Get the citations from the prompt response
-  const citations = Utils.extractCitations(promptResponse);
-  const clientCitations = ActionsHelper.formatCitations(citations);
-
-  // If there are citations, modify the content so that the sources are numbered instead of [doc1]
-  const contentText = !clientCitations
-    ? promptResponse
-    : Utils.formatCitationsResponse(promptResponse);
+  // If the response from AI includes citations, they will be parsed and added to the response
+  const [contentText, referencedCitations] =
+    promptResponse.context && promptResponse.context.citations.length > 0
+      ? Utils.formatCitations(promptResponse, promptResponse.context.citations)
+      : [promptResponse.content, null];
 
   // Send Adaptive Card with the prompt response
   const card = Utils.renderAdaptiveCard(copilotCard, {
@@ -59,6 +55,7 @@ export async function suggestedPrompt(
     },
   });
 
+  // Render the Adaptive Card based on the retrieved company details
   // Render the Adaptive Card based on the retrieved company details
   await context.sendActivity({
     attachments: [card],
@@ -77,7 +74,7 @@ export async function suggestedPrompt(
           description:
             "This message is confidential and intended only for internal use.",
         },
-        ...(clientCitations ? { citations: clientCitations } : {}),
+        ...(referencedCitations ? { citations: referencedCitations } : {}),
       },
     ],
   });
